@@ -1,27 +1,27 @@
-const express = require("express");
-const cors = require("cors");
-const compression = require("compression");
+import express, { json } from "express";
+import cors from "cors";
+import compression from "compression";
 
-const routes = require("src/app/routes/routes");
+import routes from "src/app/routes/routes";
 
-require("./database/index")
+import "./database/index";
 
-class App{
-    constructor(){
-        this.server = express();
-        this.middlewares();
-        this.routes();
-    }
+class App {
+  constructor() {
+    this.server = express();
+    this.middlewares();
+    this.routes();
+  }
 
-    middlewares(){
-        this.server.use(cors());
-        this.server.use(compression());
-        this.server.use(express.json());
-    }
+  middlewares() {
+    this.server.use(cors());
+    this.server.use(compression());
+    this.server.use(json());
+  }
 
-    routes(){
-        this.server.use(routes);
-    }
+  routes() {
+    this.server.use(routes);
+  }
 }
 
-module.exports = new App().server;
+export default new App().server;
