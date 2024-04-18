@@ -1,11 +1,12 @@
 const chalk = require("chalk");
-const OrderSchemas = require("../schemas/Order/OrderSchemas");
-const OrdersService = require("../services/OrdersService");
+const OrderSchemas = require("../schemas/Order/Order.schemas");
+const OrdersService = require("../services/Orders.service");
+const AppError = require("../errors/AppError");
 
 class OrdersController {
     async createOrder(req, res) {
         try {
-            const { name, quantity, productId } = req.body;
+            const { name, quantity, productId, clientUserId } = req.body;
             const isInvalid = OrderSchemas.createOrderSchema(name, quantity);
             if (isInvalid) {
                 const errors = {};
@@ -18,7 +19,8 @@ class OrdersController {
             const response = await OrdersService.createOrder(
                 name,
                 quantity,
-                productId
+                productId,
+                clientUserId
             );
             return res.status(201).json(response);
         } catch (error) {
@@ -31,47 +33,6 @@ class OrdersController {
             const orders = await OrdersService.getAllOrders();
             return res.status(200).json(orders);
         } catch(error) {
-            return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
-        }
-    }
-
-    async getOrderById(req, res) {
-        try {
-            const orderId = req.params.id;
-            const order = await OrdersService.findOrderById(orderId);
-            if (!order) {
-                return res.status(404).json({ message: "Pedido não encontrado" });
-            }
-            return res.status(200).json(order);
-        } catch (error) {
-            return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
-        }
-    }
-
-    async updateOrder(req, res) {
-        try {
-            const orderId = req.params.id;
-            const { name, quantity } = req.body;
-            
-            const isInvalid = OrderSchemas.createOrderSchema(name, quantity);
-    
-            if (isInvalid) {
-                const errors = {};
-                Object.entries(isInvalid).forEach(([field, errorMessages]) => {
-                    errors[field] = errorMessages.join(", ");
-                });
-                
-                return res.status(400).json({ message: "Erro de validação", errors });
-            }
-    
-            const updatedOrder = await OrdersService.updateOrder(orderId, {
-                name,
-                quantity
-            });
-    
-            console.log(chalk.blue(updatedOrder));
-            return res.status(200).json(updatedOrder);
-        } catch (error) {
             return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
         }
     }
@@ -96,7 +57,7 @@ class OrdersController {
         }
     }
 
-    async deleteAcceptedOrder(req, res) {
+    async finalizeOrder(req, res) {
         try {
             const orderId = req.params.id;
             await OrdersService.deleteAcceptedOrder(orderId);

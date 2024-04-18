@@ -1,25 +1,49 @@
-const UsersService = require("../services/Users.service")
+const AdminUsersService = require("../services/AdminUsers.service");
+const ClientUsersService = require("../services/ClientUsers.service");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const AppError = require("../errors/AppError");
 
 class AuthController {
-    async login(req, res) {
+    async loginAdmin(req, res) {
         try {
-            console.log(req.body)
             const { mail, password } = req.body;
 
-            const user = await UsersService.findUserByMail(mail);
-            if (!user) {
-                throw new AppError(401, "Credenciais inválidas");
+            const adminUser = await AdminUsersService.findUserByMail(mail);
+            if (!adminUser) {
+                throw new AppError(401, "Email não cadastrado!");
             }
 
-            const passwordMatch = await bcrypt.compare(password, user.password);
+            const passwordMatch = await bcrypt.compare(password, adminUser.password);
             if (!passwordMatch) {
-                throw new AppError(401, "Credenciais inválidas");
+                throw new AppError(401, "Senha não corresponde a este email!");
             }
 
-            const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+            const token = jwt.sign({ id: adminUser.id, userType: 'admin' }, process.env.JWT_SECRET, {
+                expiresIn: '1h' 
+            });
+
+            return res.status(200).json({ token });
+        } catch (error) {
+            return res.status(error.statusCode || 500).json({ message: error.message });
+        }
+    }
+
+    async loginClient(req, res) {
+        try {
+            const { mail, password } = req.body;
+
+            const clientUser = await ClientUsersService.findUserByMail(mail);
+            if (!clientUser) {
+                throw new AppError(401, "Email não cadastrado!");
+            }
+
+            const passwordMatch = await bcrypt.compare(password, clientUser.password);
+            if (!passwordMatch) {
+                throw new AppError(401, "Senha não corresponde a este email");
+            }
+
+            const token = jwt.sign({ id: clientUser.id, userType: 'client' }, process.env.JWT_SECRET, {
                 expiresIn: '1h' 
             });
 
@@ -31,4 +55,3 @@ class AuthController {
 }
 
 module.exports = new AuthController();
-

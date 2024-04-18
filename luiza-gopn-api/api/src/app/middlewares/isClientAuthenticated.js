@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
 const AppError = require("../errors/AppError");
+const ClientUsersService = require("../services/ClientUsers.service");
 
-const isAuthenticated = (req, res, next) => {
+const isClientAuthenticated = async (req, res, next) => {
     try {
         const token = req.headers.authorization;
 
@@ -11,11 +12,18 @@ const isAuthenticated = (req, res, next) => {
 
         const accessToken = token.split(" ")[1];
 
-        jwt.verify(accessToken, process.env.JWT_SECRET, (err, decoded) => {
+        jwt.verify(accessToken, process.env.JWT_SECRET, async (err, decoded) => {
             if (err) {
                 throw new AppError(401, "Token de autenticação inválido");
             }
-            req.userId = decoded.id;
+
+            const userId = decoded.id;
+            const user = await ClientUsersService.findUserById(userId);
+            if (!user) {
+                throw new AppError(403, "Acesso não autorizado. Você não é um cliente.");
+            }
+
+            req.userId = userId;
             next();
         });
     } catch (error) {
@@ -23,4 +31,4 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-module.exports = isAuthenticated;
+module.exports = isClientAuthenticated;

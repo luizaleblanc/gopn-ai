@@ -1,6 +1,6 @@
 const chalk = require("chalk");
-const ProductSchemas = require("../schemas/Product/ProductSchemas");
-const ProductsService = require("../services/ProductsService");
+const ProductSchemas = require("../schemas/Product/Product.schemas");
+const ProductsService = require("../services/Products.service");
 
 class ProductController {
     async createProduct(req, res) {

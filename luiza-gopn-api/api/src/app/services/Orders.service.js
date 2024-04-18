@@ -1,6 +1,7 @@
 const AppError = require("../errors/AppError");
 const Orders = require("../models/Orders");
 const Products = require("../models/Products");
+const ClientUsers = require("../models/ClientUsers"); // Importe o modelo ClientUsers
 
 class OrdersService {
     async findOrderById(id) {
@@ -17,7 +18,7 @@ class OrdersService {
         }
     }
 
-    async createOrder(name, quantity, productId) {
+    async createOrder(name, quantity, productId, clientUserId) { // Adicione clientUserId como parâmetro
         let transaction;
         try {
             transaction = await Orders.sequelize.transaction();
@@ -33,11 +34,17 @@ class OrdersService {
 
             const value = quantity * product.price;
 
+            const clientUser = await ClientUsers.findByPk(clientUserId, { transaction });
+            if (!clientUser) {
+                throw new AppError(404, "Usuário cliente não encontrado!");
+            }
+
             const newOrder = await Orders.create({
                 name,
                 value,
                 quantity,
-                productId
+                productId,
+                clientUserId
             }, { transaction });
 
             await Products.update({ stock: product.stock - quantity }, { where: { id: productId }, transaction });
@@ -131,7 +138,7 @@ class OrdersService {
             if (transaction) await transaction.rollback();
             throw new AppError(error.statusCode || 500, error.message || "Erro interno do servidor");
         }
-    }    
+    }
 }
 
 module.exports = new OrdersService();

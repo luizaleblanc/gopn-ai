@@ -61,4 +61,4 @@ const constraints = {
     },
 };
 
-export default constraints;
+module.exports = constraints;

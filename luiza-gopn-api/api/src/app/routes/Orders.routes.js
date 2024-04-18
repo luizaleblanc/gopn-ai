@@ -1,14 +1,26 @@
 const { Router } = require("express");
-const OrdersController = require("../controllers/OrdersController");
+const OrdersController = require("../controllers/Orders.controller");
+const isClientAuthenticated = require("../middlewares/isClientAuthenticated");
+const isAdminAuthenticated = require("../middlewares/isAdminAuthenticated");
 
 const routes = Router();
 
-routes.post("", OrdersController.createOrder);
-routes.get("", OrdersController.getAllOrders);
-routes.get("/:id", OrdersController.getOrderById);
-routes.put("/:id", OrdersController.updateOrder);
-routes.delete("/:id", OrdersController.cancelOrder);
-routes.post("/accept/:id", OrdersController.acceptOrder);
-routes.delete("/finalize/:id", OrdersController.finalizeOrder);
+routes.post("", isClientAuthenticated, OrdersController.createOrder);
+
+routes.get("", isAdminAuthenticated, OrdersController.getAllOrders);
+routes.update("/:id", isAdminAuthenticated, OrdersController.acceptOrder);
+routes.delete("/finalize/:id", isAdminAuthenticated, OrdersController.finalizeOrder);
+
+routes.delete("/:id", (req, res, next) => {
+    isAdminAuthenticated(req, res, (error) => {
+        if (!error) {
+            next();
+        } else {
+            isClientAuthenticated(req, res, next);
+        }
+    });
+}, OrdersController.cancelOrder);
+
+
 
 module.exports = routes;

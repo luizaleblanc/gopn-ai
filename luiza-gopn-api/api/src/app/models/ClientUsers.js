@@ -1,7 +1,8 @@
 const { Sequelize, Model, DataTypes } = require("sequelize");
 const bcrypt = require("bcrypt");
+const Orders = require("./Orders");
 
-class Users extends Model {
+class ClientUsers extends Model {
     static init(sequelize) {
         super.init(
             {
@@ -25,16 +26,18 @@ class Users extends Model {
             }
         );
 
-        this.addHook("beforeSave", async (user) => {
-            user.password = await bcrypt.hash(user.password, 8);
+        this.addHook("beforeSave", async (clientUser) => {
+            clientUser.password = await bcrypt.hash(clientUser.password, 8);
         });
 
-        this.addHook("beforeUpdate", (user, options) => {
+        this.addHook("beforeUpdate", (clientUser, options) => {
             if (options && options.fields && options.fields.includes("id")) {
                 throw new Error("Requisição inválida");
             }
         });
+
+        this.hasMany(Orders, { foreignKey: "clientUserId", as: "orders", onDelete: "CASCADE" });
     }
 }
 
-module.exports = Users;
+module.exports = ClientUsers;

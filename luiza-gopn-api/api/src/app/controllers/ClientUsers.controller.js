@@ -1,8 +1,9 @@
 const chalk = require("chalk");
 const UserSchemas = require("../schemas/User/User.schemas");
-const UserService = require("../services/Users.service");
+const ClientUsersService = require("../services/ClientUsers.service");
+const AppError = require("../errors/AppError");
 
-class UsersController {
+class ClientUsersController {
     async createUser(req, res) {
         try {
             const { mail, password, name, photoString } = req.body;
@@ -20,7 +21,7 @@ class UsersController {
 
                 return res.status(400).json({ message: "Erro de validação", errors });
             }
-            const response = await UserService.createUser(
+            const response = await ClientUsersService.createUser(
                 mail,
                 password,
                 name,
@@ -35,7 +36,7 @@ class UsersController {
     async getUserDataTokenBased(req, res) {
         try {
             const userId = req.userId;
-            const userData = await UserService.findUserById(userId);
+            const userData = await ClientUsersService.findUserById(userId);
             return res.status(200).json(userData);
         } catch(error) {
             return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
@@ -45,7 +46,7 @@ class UsersController {
     async deleteUser(req, res) {
         try {
             const userId = req.userId;
-            await UserService.deleteUser(userId);
+            await ClientUsersService.deleteUser(userId);
             return res.status(204).send();
         } catch (error) {
             return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
@@ -73,7 +74,7 @@ class UsersController {
                 return res.status(400).json({ message: "Erro de validação", errors });
             }
     
-            const updatedUser = await UserService.updateUser(userId, {
+            const updatedUser = await ClientUsersService.updateUser(userId, {
                 mail,
                 password,
                 name,
@@ -86,6 +87,16 @@ class UsersController {
             return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
         }
     }
+
+    async getAllUserOrders(req, res) {
+        try {
+            const userId = req.params.userId;
+            const orders = await ClientUsersService.getAllUserOrders(userId);
+            return res.status(200).json(orders);
+        } catch (error) {
+            return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
+        }
+    }
 }
 
-module.exports = new UsersController();
+module.exports = new ClientUsersController();

@@ -1,14 +1,15 @@
 const AppError = require("../errors/AppError");
-const Users = require("../models/Users");
+const ClientUsers = require("../models/ClientUsers");
+const Orders = require("../models/Orders");
 
-class UsersService {
+class ClientUsersService {
     async findUserById(id){
-        const user = await Users.findByPk(id);
+        const user = await ClientUsers.findByPk(id);
         return user;
     }
     
     async findUserByMail(mail){
-        const user = await Users.findOne({ where: { mail } });
+        const user = await ClientUsers.findOne({ where: { mail } });
         return user;
     }
 
@@ -21,7 +22,7 @@ class UsersService {
 
             const profilePhoto = photoString;
 
-            await Users.create({
+            await ClientUsers.create({
                 mail,
                 password,
                 name,
@@ -34,7 +35,7 @@ class UsersService {
 
     async updateUser(id, newData) {
         try {
-            const user = await Users.findByPk(id);
+            const user = await ClientUsers.findByPk(id);
             
             if (!user) {
                 throw new AppError(404, "Usuário não encontrado!");
@@ -51,12 +52,12 @@ class UsersService {
 
     async deleteUser(id) {
         try {
-            const user = await Users.findByPk(id);
+            const user = await ClientUsers.findByPk(id);
             if (!user) {
                 throw new AppError(404, "Usuário não encontrado!");
             }
 
-            await Users.destroy({ where: { id } });
+            await ClientUsers.destroy({ where: { id } });
         } catch (error) {
             throw new AppError(error.statusCode || 500, error.message || "Erro interno do servidor");
         }
@@ -64,7 +65,7 @@ class UsersService {
 
     async updateUserPassword(id, newPassword) {
         try {
-            const user = await Users.findByPk(id);
+            const user = await ClientUsers.findByPk(id);
             
             if (!user) {
                 throw new AppError(404, "Usuário não encontrado!");
@@ -78,6 +79,20 @@ class UsersService {
             throw new AppError(error.statusCode || 500, error.message || "Erro interno do servidor");
         }
     }
+
+    async getAllUserOrders(userId) {
+        try {
+            const user = await ClientUsers.findByPk(userId);
+            if (!user) {
+                throw new AppError(404, "Usuário não encontrado!");
+            }
+
+            const orders = await Orders.findAll({ where: { clientUserId: userId } });
+            return orders;
+        } catch (error) {
+            throw new AppError(error.statusCode || 500, error.message || "Erro interno do servidor");
+        }
+    }
 }
 
-module.exports = new UsersService();
+module.exports = new ClientUsersService();
