@@ -8,7 +8,7 @@ const routes = Router();
 routes.post("", isClientAuthenticated, OrdersController.createOrder);
 
 routes.get("", isAdminAuthenticated, OrdersController.getAllOrders);
-routes.update("/:id", isAdminAuthenticated, OrdersController.acceptOrder);
+routes.put("/:id", isAdminAuthenticated, OrdersController.acceptOrder);
 routes.delete("/finalize/:id", isAdminAuthenticated, OrdersController.finalizeOrder);
 
 routes.delete("/:id", (req, res, next) => {

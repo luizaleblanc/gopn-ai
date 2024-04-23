@@ -2,8 +2,8 @@ const validate = require("validate.js");
 const constraints = require("./Constraints");
 
 class OrderSchemas {
-    createOrderSchema(name, value, quantity) {
-        const orderData = { name, value, quantity };
+    createOrderSchema(name, quantity) {
+        const orderData = { name, quantity };
         const isInvalid = validate(orderData, constraints);
         return isInvalid;
     }

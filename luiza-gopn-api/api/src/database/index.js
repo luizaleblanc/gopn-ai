@@ -6,8 +6,9 @@ const AdminUser = require("../app/models/AdminUsers");
 const ClientUser = require("../app/models/ClientUsers")
 const Product = require("../app/models/Products");
 const Order = require("../app/models/Orders");
+const Category = require("../app/models/Categories");
 
-const models = [AdminUser, Order, Product, ClientUser];
+const models = [AdminUser, Order, Product, ClientUser, Category];
 
 class Database {
     constructor(){

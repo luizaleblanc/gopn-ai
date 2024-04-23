@@ -5,12 +5,13 @@ const ProductsService = require("../services/Products.service");
 class ProductController {
     async createProduct(req, res) {
         try {
-            const { name, category, price, stock, photoStrings } = req.body;
+            const { name, category, price, stock, description, photoStrings } = req.body;
             const isInvalid = ProductSchemas.createProductSchema(
                 name,
                 category,
                 price,
                 stock,
+                description,
                 photoStrings
             );
             if (isInvalid) {
@@ -26,6 +27,7 @@ class ProductController {
                 category,
                 price,
                 stock,
+                description,
                 photoStrings
             );
             return res.status(201).json(response);
@@ -99,6 +101,26 @@ class ProductController {
             console.log(chalk.blue(updatedProduct));
             return res.status(200).json(updatedProduct);
         } catch (error) {
+            return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
+        }
+    }
+    async toggleProductForSale(req, res) {
+        try {
+            const productId = req.params.id;
+
+            const updatedProduct = await ProductsService.toggleProductForSale(productId);
+
+            console.log(chalk.blue(updatedProduct));
+            return res.status(200).json(updatedProduct);
+        } catch (error) {
+            return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
+        }
+    }
+    async getProductsForSale(req, res) {
+        try {
+            const products = await ProductsService.getProductsForSale();
+            return res.status(200).json(products);
+        } catch(error) {
             return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
         }
     }

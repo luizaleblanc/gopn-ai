@@ -1,6 +1,6 @@
 const { Sequelize, Model, DataTypes } = require("sequelize");
 
-class Orders extends Model {
+class Categories extends Model {
     static init(sequelize) {
         super.init(
             {
@@ -10,13 +10,6 @@ class Orders extends Model {
                     primaryKey: true
                 },
                 name: DataTypes.STRING,
-                value: DataTypes.DECIMAL(10, 2),
-                quantity: DataTypes.INTEGER,
-                accepted: {
-                    type: DataTypes.BOOLEAN,
-                    defaultValue: false
-                },
-                clientName: DataTypes.STRING
             },
             {
                 sequelize,
@@ -25,4 +18,4 @@ class Orders extends Model {
     }
 }
 
-module.exports = Orders;
+module.exports = Categories;

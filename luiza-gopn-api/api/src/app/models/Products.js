@@ -15,7 +15,11 @@ class Products extends Model {
                 category: DataTypes.STRING,
                 price: DataTypes.DECIMAL(10, 2),
                 stock: DataTypes.INTEGER,
-                description: DataTypes.TEXT
+                description: DataTypes.TEXT,
+                forSale: {
+                    type: DataTypes.BOOLEAN,
+                    defaultValue: true
+                },
             },
             {
                 sequelize,

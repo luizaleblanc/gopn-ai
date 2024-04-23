@@ -27,6 +27,8 @@ class AdminUsersService {
                 name,
                 profilePhoto
             });
+
+            return "Usuário Admin criado com sucesso";
         } catch (error) {
             throw new AppError(error.statusCode || 500, error.message || "Erro interno do servidor");
         }

@@ -1,7 +1,7 @@
 const AppError = require("../errors/AppError");
 const Orders = require("../models/Orders");
 const Products = require("../models/Products");
-const ClientUsers = require("../models/ClientUsers"); // Importe o modelo ClientUsers
+const ClientUsers = require("../models/ClientUsers");
 
 class OrdersService {
     async findOrderById(id) {
@@ -18,45 +18,47 @@ class OrdersService {
         }
     }
 
-    async createOrder(name, quantity, productId, clientUserId) { // Adicione clientUserId como parâmetro
+    async createOrder(name, quantity, productId, clientUserId, clientName) { 
         let transaction;
         try {
             transaction = await Orders.sequelize.transaction();
-
+    
             const product = await Products.findByPk(productId, { transaction });
             if (!product) {
                 throw new AppError(404, "Produto não encontrado!");
             }
-
+    
             if (product.stock < quantity) {
                 throw new AppError(400, "Quantidade solicitada maior que o estoque disponível!");
             }
-
+    
             const value = quantity * product.price;
-
+    
             const clientUser = await ClientUsers.findByPk(clientUserId, { transaction });
             if (!clientUser) {
                 throw new AppError(404, "Usuário cliente não encontrado!");
             }
-
+    
             const newOrder = await Orders.create({
                 name,
                 value,
                 quantity,
                 productId,
-                clientUserId
+                clientUserId,
+                clientName 
             }, { transaction });
-
+    
             await Products.update({ stock: product.stock - quantity }, { where: { id: productId }, transaction });
-
+    
             await transaction.commit();
-
+    
             return newOrder;
         } catch (error) {
             if (transaction) await transaction.rollback();
             throw new AppError(error.statusCode || 500, error.message || "Erro interno do servidor");
         }
     }
+    
 
     async updateOrder(id, newData) {
         let transaction;

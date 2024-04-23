@@ -8,7 +8,7 @@ class ProductsService {
         return product;
     }
 
-    async createProduct(name, category, price, stock, photoStrings) {
+    async createProduct(name, category, price, stock, description, photoStrings) {
         let transaction;
         try {
             transaction = await Products.sequelize.transaction();
@@ -23,6 +23,7 @@ class ProductsService {
                 category,
                 price,
                 stock,
+                description,
                 photoStrings
             }, { transaction });
 
@@ -95,6 +96,36 @@ class ProductsService {
 
             const orders = await Orders.findAll({ where: { productId } });
             return orders;
+        } catch (error) {
+            throw new AppError(error.statusCode || 500, error.message || "Erro interno do servidor");
+        }
+    }
+
+    async toggleProductForSale(productId) {
+        let transaction;
+        try {
+            transaction = await Products.sequelize.transaction();
+
+            const product = await Products.findByPk(productId, { transaction });
+            if (!product) {
+                throw new AppError(404, "Produto não encontrado!");
+            }
+
+            const updatedProduct = await product.update({ forSale: !product.forSale }, { transaction });
+
+            await transaction.commit();
+
+            return updatedProduct;
+        } catch (error) {
+            if (transaction) await transaction.rollback();
+            throw new AppError(error.statusCode || 500, error.message || "Erro interno do servidor");
+        }
+    }
+
+    async getProductsForSale() {
+        try {
+            const products = await Products.findAll({ where: { forSale: true } });
+            return products;
         } catch (error) {
             throw new AppError(error.statusCode || 500, error.message || "Erro interno do servidor");
         }
